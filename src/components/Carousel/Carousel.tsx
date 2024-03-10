@@ -1,27 +1,35 @@
-import { useState, useRef } from 'react';
-import {View, FlatList, Image, useWindowDimensions, ViewToken} from 'react-native';
+import {useState, useRef} from 'react';
+import {
+  View,
+  FlatList,
+  Image,
+  useWindowDimensions,
+  ViewToken,
+} from 'react-native';
 import colors from '../../theme/colors';
 import DoublePressable from '../DoublePressable';
-import { ViewabilityConfig } from 'react-native';
+import {ViewabilityConfig} from 'react-native';
 
 interface ICarousel {
   images: string[];
-  onDoublePress?: () => void
+  onDoublePress?: () => void;
 }
 
 const Carousel = ({images, onDoublePress = () => {}}: ICarousel) => {
   const {width} = useWindowDimensions();
-  const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const viewabilityConfig: ViewabilityConfig = {
-    itemVisiblePercentThreshold: 51
-  }
-                          // stops function from rerendering
-  const onViewableItemsChanged = useRef(({viewableItems}: {viewableItems: Array<ViewToken>}) => {
-    if (viewableItems.length > 0) {
-      setActiveImageIndex(viewableItems[0].index || 0)
-    }
-  })
+    itemVisiblePercentThreshold: 51,
+  };
+  // stops function from rerendering
+  const onViewableItemsChanged = useRef(
+    ({viewableItems}: {viewableItems: Array<ViewToken>}) => {
+      if (viewableItems.length > 0) {
+        setActiveImageIndex(viewableItems[0].index || 0);
+      }
+    },
+  );
 
   return (
     <View>
@@ -47,16 +55,17 @@ const Carousel = ({images, onDoublePress = () => {}}: ICarousel) => {
         }}>
         {images.map((_, index) => (
           <View
-          key={index}
-          style={{
-            width: 10,
-            aspectRatio: 1,
-            borderRadius: 5,
-            backgroundColor: activeImageIndex === index ? colors.primary : 'white',
-            margin: 10,
-            marginHorizontal: 5
-          }}
-        />
+            key={index}
+            style={{
+              width: 10,
+              aspectRatio: 1,
+              borderRadius: 5,
+              backgroundColor:
+                activeImageIndex === index ? colors.primary : 'white',
+              margin: 10,
+              marginHorizontal: 5,
+            }}
+          />
         ))}
       </View>
     </View>
