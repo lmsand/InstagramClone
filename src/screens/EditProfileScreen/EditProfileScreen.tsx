@@ -4,9 +4,12 @@ import colors from '../../theme/colors';
 import fonts from '../../theme/fonts';
 import {useForm, Controller, Control} from 'react-hook-form';
 import {IUser} from '../../types/models';
+import {useState} from 'react';
+
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const URL_REGEX =
-/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 
 type IEditableUserField = 'name' | 'username' | 'website' | 'bio';
 type IEditableUser = Pick<IUser, IEditableUserField>;
@@ -39,13 +42,20 @@ const CustomInput = ({
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
-              style={[styles.input, {
-                borderColor: error ? colors.error : colors.border
-              }]}
+              style={[
+                styles.input,
+                {
+                  borderColor: error ? colors.error : colors.border,
+                },
+              ]}
               placeholder={label}
               multiline={multiline}
             />
-            {error && <Text style={{color: colors.error }}>{error.message || 'Error'}</Text>}
+            {error && (
+              <Text style={{color: colors.error}}>
+                {error.message || 'Error'}
+              </Text>
+            )}
           </View>
         </View>
       );
@@ -54,6 +64,7 @@ const CustomInput = ({
 );
 
 const EditProfileScreen = () => {
+  const [selectedPhoto, setSelectedPhoto] = useState<null | Asset>(null);
   const {
     control,
     handleSubmit,
@@ -63,17 +74,34 @@ const EditProfileScreen = () => {
       name: user.name,
       username: user.username,
       website: user.website,
-      bio: user.bio
-    }
+      bio: user.bio,
+    },
   });
 
   const onSubmit = (data: IEditableUser) => {
     console.log('submit', data);
   };
+
+  const onChangePhoto = () => {
+    launchImageLibrary(
+      {mediaType: 'photo'},
+      ({didCancel, errorCode, errorMessage, assets}) => {
+        if (!didCancel && !errorCode && assets && assets.length > 0) {
+          setSelectedPhoto(assets[0]);
+        }
+      },
+    );
+  };
+
   return (
     <View style={styles.page}>
-      <Image source={{uri: user.image}} style={styles.avatar} />
-      <Text style={styles.textButton}>Change Profile Photo</Text>
+      <Image
+        source={{uri: selectedPhoto?.uri || user.image}}
+        style={styles.avatar}
+      />
+      <Text onPress={onChangePhoto} style={styles.textButton}>
+        Change Profile Photo
+      </Text>
 
       <CustomInput
         name="name"
@@ -84,26 +112,36 @@ const EditProfileScreen = () => {
       <CustomInput
         name="username"
         control={control}
-        rules={{required: 'Username is required', minLength: {value: 3, message: 'Username should be more than 3 characters'}}}
+        rules={{
+          required: 'Username is required',
+          minLength: {
+            value: 3,
+            message: 'Username should be more than 3 characters',
+          },
+        }}
         label="Username"
       />
       <CustomInput
         name="website"
         control={control}
-        rules={{pattern: {
-          value: URL_REGEX,
-          message: 'Invalid url'
-        }}}
+        rules={{
+          pattern: {
+            value: URL_REGEX,
+            message: 'Invalid url',
+          },
+        }}
         label="Website"
       />
       <CustomInput
         name="bio"
         control={control}
         label="Bio"
-        rules={{maxLength: {
-          value: 200,
-          message: 'Bio should be less than 200 characters'
-        }}}
+        rules={{
+          maxLength: {
+            value: 200,
+            message: 'Bio should be less than 200 characters',
+          },
+        }}
         multiline
       />
 
